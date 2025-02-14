@@ -15,6 +15,7 @@ func main() {
 	dist := 0.
 	input := ""
 	interactive := true
+	argsIndex := 0
 
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -27,19 +28,10 @@ func main() {
 		input = os.Args[1]
 	}
 
-	// Use remaining arguments as distances for which we should calculate angles
 	// Passing distances as arguments disables interactive mode
-	dists := []float64{}
 	if len(os.Args) >= 3 {
 		interactive = false
-		for _, arg := range os.Args[2:] {
-			dist, err := strconv.ParseFloat(arg, 64)
-			if err != nil {
-				fmt.Printf("Invalid angle: %s\n", arg)
-				continue
-			}
-			dists = append(dists, dist)
-		}
+		argsIndex = 2
 	}
 
 	team := input[0]
@@ -65,8 +57,8 @@ func main() {
 	//  maxAngle - angle      dist - minDist
 	// ------------------- = -----------------, simplify to the form: angle = M * dist + B
 	// maxAngle - minAngle   maxDist - minDist
-	M := (minAngle - maxAngle) / (maxDist - minDist)
-	B := (minDist * ((maxAngle - minAngle) / (maxDist - minDist))) + maxAngle
+	m := (minAngle - maxAngle) / (maxDist - minDist)
+	b := (minDist * ((maxAngle - minAngle) / (maxDist - minDist))) + maxAngle
 
 	for {
 		if interactive {
@@ -82,24 +74,31 @@ func main() {
 				continue
 			}
 		} else {
-			// "Pop" an element from the beginning of the distances list
-			if len(dists) == 0 {
+			// Use arguments as distances for which we should calculate angles
+			if argsIndex >= len(os.Args) {
 				break
 			}
-			dist = dists[0]
-			dists = dists[1:]
+			arg := os.Args[argsIndex]
+			argsIndex++
+
+			var err error
+			dist, err = strconv.ParseFloat(arg, 64)
+			if err != nil {
+				fmt.Printf("Invalid angle: %s\n", arg)
+				break
+			}
 		}
 
+		// The repo https://github.com/pastuh/hllminicalculator does this
+		// They commented "random values fix (faction-gb)"
+		// TODO: Figure out why this is needed
 		if team == 'b' {
-			// The repo https://github.com/pastuh/hllminicalculator does this
-			// They commented "random values fix (faction-gb)"
-			// TODO: Figure out why this is needed
 			if (dist >= 200 && dist <= 800) || (dist >= 1100 && dist <= 1200) {
 				dist -= 5
 			}
 		}
 
-		angle := M*dist + B
+		angle := m*dist + b
 
 		fmt.Printf("%.0f\n", angle)
 	}
