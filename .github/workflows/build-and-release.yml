@@ -19,9 +19,10 @@ jobs:
     - uses: cachix/install-nix-action@v30
 
     - name: Build Project
-      run: nix develop --command bash -c "./build.sh"
+      run: nix develop --command bash -c "VERSION=${{ github.ref_name }} ./build.sh"
 
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: ./build/*
+        allowUpdates: true

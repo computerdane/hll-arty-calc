@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [ -z "${VERSION}" ]; then
+  VERSION=devel
+fi
+
 rm -rf build
 mkdir -p build
 
@@ -11,5 +15,6 @@ for os_arch in "${os_archs[@]}"; do
     output_name+=".exe"
   fi
   echo "Building for $os/$arch..."
-  GOOS=$os GOARCH=$arch go build -o "build/$output_name"
+  GOOS=$os GOARCH=$arch go build -o "build/$output_name" \
+    -ldflags="-X main.Version=$VERSION"
 done
