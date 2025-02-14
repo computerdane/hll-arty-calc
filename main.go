@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+var Version string
+
 func main() {
 	minDist := 100.
 	maxDist := 1600.
@@ -26,6 +28,10 @@ func main() {
 		input = scanner.Text()
 	} else {
 		input = os.Args[1]
+		if input == "-v" || input == "--version" {
+			fmt.Println(Version)
+			os.Exit(0)
+		}
 	}
 
 	// Passing distances as arguments disables interactive mode
